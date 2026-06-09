@@ -6,31 +6,34 @@ const gameIframe = document.getElementById("game-iframe");
 let loggedIn = false;
 let currentUser = null;
 
-let allowedUsers = ["player1","player2","guest"];
-let adminUsers   = ["admin","owner"]; // MAKE SURE YOUR ADMIN USERNAME IS HERE
+// USER DATABASE
+let allowedUsers = ["player1", "player2", "guest"];
+let adminUsers = ["admin", "owner"]; // MAKE SURE YOUR ADMIN USERNAME IS HERE
 
+// GAME DATABASE
 let games = [
-  {id:"voidrunner", title:"Void Runner", url:"/games/voidrunner/index.html"},
-  {id:"cryptshift", title:"Crypt Shift", url:"/games/cryptshift/index.html"}
+  { id: "voidrunner", title: "Void Runner", url: "/games/voidrunner/index.html" },
+  { id: "cryptshift", title: "Crypt Shift", url: "/games/cryptshift/index.html" }
 ];
 
-function print(text){
+// PRINT TO TERMINAL
+function print(text) {
   output.innerHTML += text + "\n";
   output.scrollTop = output.scrollHeight;
 }
 
-function loginSystem(username){
- if (base === "listusers") {
-  print("Admin users:");
-  adminUsers.forEach(u => print(" - " + u));
-
-  print("\nNormal users:");
-  allowedUsers.forEach(u => print(" - " + u));
-
-  return;
+// LOGIN SYSTEM
+function loginSystem(username) {
+  if (adminUsers.includes(username)) {
+    loggedIn = true;
+    currentUser = username;
+    print("ADMIN ACCESS GRANTED");
+    print("Welcome, " + username);
+    print("Type 'adminhelp' for help.");
+    return;
   }
 
-  if(allowedUsers.includes(username)){
+  if (allowedUsers.includes(username)) {
     loggedIn = true;
     currentUser = username;
     print("ACCESS GRANTED");
@@ -42,32 +45,35 @@ function loginSystem(username){
   print("ACCESS DENIED");
 }
 
-async function loadPage(name){
-  try{
+// LOAD PAGE CONTENT
+async function loadPage(name) {
+  try {
     const res = await fetch(`pages/${name}.txt`);
-    if(!res.ok){
+    if (!res.ok) {
       print("Page not found.");
       return;
     }
     const text = await res.text();
     print("\n" + text + "\n");
-  }catch(e){
+  } catch (e) {
     print("Error loading page.");
   }
 }
 
-function showGames(){
+// SHOW GAME LIST
+function showGames() {
   print("\nGAME LAUNCHER");
   print("-------------");
-  games.forEach(g=>{
-    print(`- ${g.id}: ${g.title}  (type: play ${g.id})`);
+  games.forEach(g => {
+    print(`- ${g.id}: ${g.title} (type: play ${g.id})`);
   });
   print("");
 }
 
-function playGame(id){
-  const g = games.find(x=>x.id === id);
-  if(!g){
+// PLAY GAME INSIDE TERMINAL
+function playGame(id) {
+  const g = games.find(x => x.id === id);
+  if (!g) {
     print("Game not found.");
     return;
   }
@@ -77,66 +83,83 @@ function playGame(id){
   gameFrame.style.display = "block";
 }
 
-function closeGame(){
+// CLOSE GAME
+function closeGame() {
   gameIframe.src = "";
   gameFrame.style.display = "none";
   print("Game closed.");
 }
 
-function showAdminConfig(){
+// ADMIN CONFIG MENU
+function showAdminConfig() {
   print("\nADMIN CONFIG MENU");
   print("-----------------");
   print("Current user: " + currentUser);
-  print("Admin users: " + adminUsers.join(", "));
-  print("Normal users: " + allowedUsers.join(", "));
+  print("Admin users:");
+  adminUsers.forEach(u => print(" - " + u));
+  print("\nNormal users:");
+  allowedUsers.forEach(u => print(" - " + u));
   print("\nGames:");
-  games.forEach(g=>{
-    print(` - ${g.id}: ${g.title} (${g.url})`);
-  });
+  games.forEach(g => print(` - ${g.id}: ${g.title} (${g.url})`));
   print("\nAdmin commands:");
   print(" - adminhelp");
+  print(" - adminconfig");
+  print(" - listusers");
   print(" - adduser <name>");
   print(" - deluser <name>");
+  print(" - listgames");
   print(" - addgame <id> <title> <url>");
   print(" - delgame <id>");
   print(" - closegame");
   print("");
 }
 
-function run(command){
+// MAIN COMMAND ROUTER
+function run(command) {
   const parts = command.split(" ");
-  const base  = parts[0];
-  const arg   = parts[1];
+  const base = parts[0];
+  const arg = parts[1];
 
-  if(!loggedIn){
+  // LOGIN FIRST
+  if (!loggedIn) {
     loginSystem(command);
     return;
   }
 
   // ============================
-  // ADMIN COMMANDS (ALWAYS FIRST)
+  // ADMIN COMMANDS
   // ============================
-  if(adminUsers.includes(currentUser)){
+  if (adminUsers.includes(currentUser)) {
 
-    if(base === "adminhelp"){
+    if (base === "adminhelp") {
       print("Admin Commands:");
       print(" - adminconfig");
+      print(" - listusers");
       print(" - adduser <name>");
       print(" - deluser <name>");
+      print(" - listgames");
       print(" - addgame <id> <title> <url>");
       print(" - delgame <id>");
       print(" - closegame");
       return;
     }
 
-    if(base === "adminconfig"){
+    if (base === "adminconfig") {
       showAdminConfig();
       return;
     }
 
-    if(base === "adduser"){
-      if(!arg){ print("Usage: adduser <name>"); return; }
-      if(allowedUsers.includes(arg)){
+    if (base === "listusers") {
+      print("Admin users:");
+      adminUsers.forEach(u => print(" - " + u));
+      print("\nNormal users:");
+      allowedUsers.forEach(u => print(" - " + u));
+      return;
+    }
+
+    if (base === "adduser") {
+      if (!arg) { print("Usage: adduser <name>"); return; }
+      if (allowedUsers.includes(arg)) {
         print("User already exists.");
         return;
       }
@@ -145,9 +168,9 @@ function run(command){
       return;
     }
 
-    if(base === "deluser"){
-      if(!arg){ print("Usage: deluser <name>"); return; }
-      if(!allowedUsers.includes(arg)){
+    if (base === "deluser") {
+      if (!arg) { print("Usage: deluser <name>"); return; }
+      if (!allowedUsers.includes(arg)) {
         print("User not found.");
         return;
       }
@@ -156,29 +179,35 @@ function run(command){
       return;
     }
 
-    if(base === "addgame"){
+    if (base === "listgames") {
+      print("Games:");
+      games.forEach(g => print(` - ${g.id}: ${g.title} (${g.url})`));
+      return;
+    }
+
+    if (base === "addgame") {
       const id = parts[1];
       const title = parts[2];
       const url = parts[3];
 
-      if(!id || !title || !url){
+      if (!id || !title || !url) {
         print("Usage: addgame <id> <title> <url>");
         return;
       }
 
-      games.push({id, title, url});
+      games.push({ id, title, url });
       print(`Game added: ${title} (${id})`);
       return;
     }
 
-    if(base === "delgame"){
-      if(!arg){ print("Usage: delgame <id>"); return; }
+    if (base === "delgame") {
+      if (!arg) { print("Usage: delgame <id>"); return; }
       games = games.filter(g => g.id !== arg);
       print("Game removed: " + arg);
       return;
     }
 
-    if(base === "closegame"){
+    if (base === "closegame") {
       closeGame();
       return;
     }
@@ -188,7 +217,7 @@ function run(command){
   // NORMAL COMMANDS
   // ============================
 
-  if(base === "help"){
+  if (base === "help") {
     print("Commands:");
     print(" - help");
     print(" - clear");
@@ -196,19 +225,19 @@ function run(command){
     print(" - games");
     print(" - play <id>");
     print(" - closegame");
-    if(adminUsers.includes(currentUser)){
+    if (adminUsers.includes(currentUser)) {
       print("Admin: type 'adminhelp' for more.");
     }
     return;
   }
 
-  if(base === "clear"){
+  if (base === "clear") {
     output.innerHTML = "";
     return;
   }
 
-  if(base === "open"){
-    if(!arg){
+  if (base === "open") {
+    if (!arg) {
       print("Usage: open <page>");
       return;
     }
@@ -217,17 +246,17 @@ function run(command){
     return;
   }
 
-  if(base === "games"){
+  if (base === "games") {
     showGames();
     return;
   }
 
-  if(base === "play"){
+  if (base === "play") {
     playGame(arg);
     return;
   }
 
-  if(base === "closegame"){
+  if (base === "closegame") {
     closeGame();
     return;
   }
@@ -235,8 +264,9 @@ function run(command){
   print("Unknown command.");
 }
 
-input.addEventListener("keydown", e=>{
-  if(e.key === "Enter"){
+// INPUT HANDLER
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
     const v = input.value.trim();
     print("> " + v);
     run(v);
