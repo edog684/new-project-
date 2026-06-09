@@ -1,21 +1,17 @@
 const output = document.getElementById("output");
 const input = document.getElementById("terminal-input");
+const gameFrame = document.getElementById("game-frame");
+const gameIframe = document.getElementById("game-iframe");
 
 let loggedIn = false;
 let currentUser = null;
 
-const allowedUsers = ["player1","player2","guest"];
-const adminUsers   = ["admin","owner"]; // EDIT ADMIN USERS HERE
+let allowedUsers = ["player1","player2","guest"];
+let adminUsers   = ["admin","owner"]; // EDIT ADMINS HERE
 
-const games = [
+let games = [
   {id:"voidrunner", title:"Void Runner", url:"/games/voidrunner/index.html"},
   {id:"cryptshift", title:"Crypt Shift", url:"/games/cryptshift/index.html"}
-];
-
-const searchIndex = [
-  {id:"about",   text:"About page content"},
-  {id:"games",   text:"Games list"},
-  {id:"contact", text:"Contact info"}
 ];
 
 function print(text){
@@ -68,19 +64,22 @@ function showGames(){
   print("");
 }
 
-function searchLocal(query){
-  const q = query.toLowerCase();
-  const results = searchIndex.filter(i =>
-    i.id.toLowerCase().includes(q) ||
-    i.text.toLowerCase().includes(q)
-  );
-
-  if(results.length === 0){
-    print("No results found.");
+function playGame(id){
+  const g = games.find(x=>x.id === id);
+  if(!g){
+    print("Game not found.");
     return;
   }
 
-  results.forEach(i=>print(`- ${i.id}`));
+  print("Launching " + g.title + "...");
+  gameIframe.src = g.url;
+  gameFrame.style.display = "block";
+}
+
+function closeGame(){
+  gameIframe.src = "";
+  gameFrame.style.display = "none";
+  print("Game closed.");
 }
 
 function showAdminConfig(){
@@ -89,15 +88,17 @@ function showAdminConfig(){
   print("Current user: " + currentUser);
   print("Admin users: " + adminUsers.join(", "));
   print("Normal users: " + allowedUsers.join(", "));
-  print("Games:");
+  print("\nGames:");
   games.forEach(g=>{
     print(` - ${g.id}: ${g.title} (${g.url})`);
   });
   print("\nAdmin commands:");
   print(" - adminhelp");
+  print(" - adduser <name>");
+  print(" - deluser <name>");
   print(" - addgame <id> <title> <url>");
-  print(" - listgames");
-  print(" - listusers");
+  print(" - delgame <id>");
+  print(" - closegame");
   print("");
 }
 
@@ -111,14 +112,17 @@ function run(command){
     return;
   }
 
-  // ADMIN-ONLY COMMANDS
+  // ADMIN COMMANDS
   if(adminUsers.includes(currentUser)){
+
     if(base === "adminhelp"){
       print("Admin Commands:");
       print(" - adminconfig");
+      print(" - adduser <name>");
+      print(" - deluser <name>");
       print(" - addgame <id> <title> <url>");
-      print(" - listgames");
-      print(" - listusers");
+      print(" - delgame <id>");
+      print(" - closegame");
       return;
     }
 
@@ -127,10 +131,24 @@ function run(command){
       return;
     }
 
+    if(base === "adduser"){
+      if(!arg){ print("Usage: adduser <name>"); return; }
+      allowedUsers.push(arg);
+      print("User added: " + arg);
+      return;
+    }
+
+    if(base === "deluser"){
+      if(!arg){ print("Usage: deluser <name>"); return; }
+      allowedUsers = allowedUsers.filter(u => u !== arg);
+      print("User removed: " + arg);
+      return;
+    }
+
     if(base === "addgame"){
-      const id    = parts[1];
+      const id = parts[1];
       const title = parts[2];
-      const url   = parts[3];
+      const url = parts[3];
 
       if(!id || !title || !url){
         print("Usage: addgame <id> <title> <url>");
@@ -142,17 +160,15 @@ function run(command){
       return;
     }
 
-    if(base === "listgames"){
-      print("Games:");
-      games.forEach(g=>{
-        print(` - ${g.id}: ${g.title} (${g.url})`);
-      });
+    if(base === "delgame"){
+      if(!arg){ print("Usage: delgame <id>"); return; }
+      games = games.filter(g => g.id !== arg);
+      print("Game removed: " + arg);
       return;
     }
 
-    if(base === "listusers"){
-      print("Admin users: " + adminUsers.join(", "));
-      print("Normal users: " + allowedUsers.join(", "));
+    if(base === "closegame"){
+      closeGame();
       return;
     }
   }
@@ -163,9 +179,9 @@ function run(command){
     print(" - help");
     print(" - clear");
     print(" - open <page>");
-    print(" - search <word>");
     print(" - games");
     print(" - play <id>");
+    print(" - closegame");
     if(adminUsers.includes(currentUser)){
       print("Admin: type 'adminhelp' for more.");
     }
@@ -189,22 +205,11 @@ function run(command){
   }
 
   else if(base === "play"){
-    const g = games.find(x=>x.id === arg);
-    if(!g){
-      print("Game not found.");
-      return;
-    }
-    print("Launching " + g.title + "...");
-    window.open(g.url, "_blank");
+    playGame(arg);
   }
 
-  else if(base === "search"){
-    if(!arg){
-      print("Usage: search <query>");
-      return;
-    }
-    print(`Searching for '${arg}'...`);
-    searchLocal(arg);
+  else if(base === "closegame"){
+    closeGame();
   }
 
   else{
