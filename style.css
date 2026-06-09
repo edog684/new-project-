@@ -3,4 +3,5 @@ body { background:#000; margin:0; }
 #input-line { display:flex; align-items:center; }
 .prompt { margin-right:8px; color:#00ffaa; }
 #terminal-input { background:transparent; border:none; outline:none; color:#00ff66; font-size:1rem; width:80%; }
-a { color:#00ffaa; }
+.result { color:#00ffaa; cursor:pointer; }
+.result:hover { text-decoration:underline; }
