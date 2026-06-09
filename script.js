@@ -7,7 +7,7 @@ let loggedIn = false;
 let currentUser = null;
 
 let allowedUsers = ["player1","player2","guest"];
-let adminUsers   = ["admin","owner"]; // EDIT ADMINS HERE
+let adminUsers   = ["admin","owner"]; // MAKE SURE YOUR ADMIN USERNAME IS HERE
 
 let games = [
   {id:"voidrunner", title:"Void Runner", url:"/games/voidrunner/index.html"},
@@ -112,7 +112,9 @@ function run(command){
     return;
   }
 
-  // ADMIN COMMANDS
+  // ============================
+  // ADMIN COMMANDS (ALWAYS FIRST)
+  // ============================
   if(adminUsers.includes(currentUser)){
 
     if(base === "adminhelp"){
@@ -133,6 +135,10 @@ function run(command){
 
     if(base === "adduser"){
       if(!arg){ print("Usage: adduser <name>"); return; }
+      if(allowedUsers.includes(arg)){
+        print("User already exists.");
+        return;
+      }
       allowedUsers.push(arg);
       print("User added: " + arg);
       return;
@@ -140,6 +146,10 @@ function run(command){
 
     if(base === "deluser"){
       if(!arg){ print("Usage: deluser <name>"); return; }
+      if(!allowedUsers.includes(arg)){
+        print("User not found.");
+        return;
+      }
       allowedUsers = allowedUsers.filter(u => u !== arg);
       print("User removed: " + arg);
       return;
@@ -173,7 +183,10 @@ function run(command){
     }
   }
 
+  // ============================
   // NORMAL COMMANDS
+  // ============================
+
   if(base === "help"){
     print("Commands:");
     print(" - help");
@@ -185,36 +198,40 @@ function run(command){
     if(adminUsers.includes(currentUser)){
       print("Admin: type 'adminhelp' for more.");
     }
+    return;
   }
 
-  else if(base === "clear"){
+  if(base === "clear"){
     output.innerHTML = "";
+    return;
   }
 
-  else if(base === "open"){
+  if(base === "open"){
     if(!arg){
       print("Usage: open <page>");
       return;
     }
     print(`Opening ${arg}...`);
     loadPage(arg);
+    return;
   }
 
-  else if(base === "games"){
+  if(base === "games"){
     showGames();
+    return;
   }
 
-  else if(base === "play"){
+  if(base === "play"){
     playGame(arg);
+    return;
   }
 
-  else if(base === "closegame"){
+  if(base === "closegame"){
     closeGame();
+    return;
   }
 
-  else{
-    print("Unknown command.");
-  }
+  print("Unknown command.");
 }
 
 input.addEventListener("keydown", e=>{
