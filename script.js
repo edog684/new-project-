@@ -20,13 +20,14 @@ function print(text){
 }
 
 function loginSystem(username){
-  if(adminUsers.includes(username)){
-    loggedIn = true;
-    currentUser = username;
-    print("ADMIN ACCESS GRANTED");
-    print("Welcome, " + username);
-    print("Type 'adminhelp' for help.");
-    return;
+ if (base === "listusers") {
+  print("Admin users:");
+  adminUsers.forEach(u => print(" - " + u));
+
+  print("\nNormal users:");
+  allowedUsers.forEach(u => print(" - " + u));
+
+  return;
   }
 
   if(allowedUsers.includes(username)){
