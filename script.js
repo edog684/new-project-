@@ -29,7 +29,7 @@ function loginSystem(username){
     currentUser = username;
     print("ADMIN ACCESS GRANTED");
     print("Welcome, " + username);
-    print("Type 'help' or 'adminhelp'.");
+    print("Type 'adminhelp' for help.");
     return;
   }
 
