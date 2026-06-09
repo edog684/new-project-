@@ -1,0 +1,4 @@
+ABOUT PAGE
+----------
+Welcome to the terminal-based website.
+This page loads entirely inside the terminal.
