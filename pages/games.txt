@@ -1,0 +1,4 @@
+GAMES
+-----
+Available HTML games can be listed here.
+You can link them or describe them.
